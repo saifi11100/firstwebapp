@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture Photo on Button Click</title>
+</head>
+<body>
+
+<video id="video" width="320" height="240" autoplay></video>
+<canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+<img id="photo" alt="Captured Photo" width="320" height="240" />
+
+<!-- Capture button -->
+<button id="captureButton">Capture Photo</button>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const photo = document.getElementById('photo');
+    const captureButton = document.getElementById('captureButton');
+
+    // Function to request camera access
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.log("Camera access denied: " + err);
+                alert("Camera permission is required to capture a photo.");
+            });
+    }
+
+    // Function to capture the photo when the button is clicked
+    function capturePhoto() {
+        // Ensure the video has enough data to capture the frame
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            // Draw the video frame to the canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Get the image data from the canvas
+            const dataUrl = canvas.toDataURL('image/png');
+
+            // Set the image in the img element
+            photo.setAttribute('src', dataUrl);
+        }
+    }
+
+    // Start the camera and request permission
+    startCamera();
+
+    // Add event listener to the button to capture the photo on click
+    captureButton.addEventListener('click', capturePhoto);
+</script>
+
+</body>
+</html>
+
