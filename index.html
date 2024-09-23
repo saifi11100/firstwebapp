@@ -3,58 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capture Photo on Button Click</title>
+    <title>Automatic Photo Capture</title>
+    <style>
+        /* Style for the output images */
+        #photos img {
+            width: 150px; /* Set width of captured images */
+            margin: 5px; /* Add some margin between images */
+        }
+        video {
+            width: 400px; /* Set width of the video */
+            border: 1px solid black; /* Optional: Add border around video */
+        }
+    </style>
 </head>
 <body>
 
-<video id="video" width="320" height="240" autoplay></video>
-<canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
-<img id="photo" alt="Captured Photo" width="320" height="240" />
+    <h1>Photo Capture Every 2 Seconds</h1>
+    
+    <!-- Video stream -->
+    <video id="video" autoplay playsinline></video>
 
-<!-- Capture button -->
-<button id="captureButton">Capture Photo</button>
+    <!-- Canvas to capture the image -->
+    <canvas id="canvas" style="display: none;"></canvas>
 
-<script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    const photo = document.getElementById('photo');
-    const captureButton = document.getElementById('captureButton');
+    <!-- Image preview -->
+    <div id="photos"></div>
 
-    // Function to request camera access
-    function startCamera() {
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photos = document.getElementById('photos');
+        const context = canvas.getContext('2d');
+
+        // Access the webcam
         navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(stream) {
-                video.srcObject = stream;
+            .then((stream) => {
+                video.srcObject = stream; // Set the video source to the webcam stream
             })
-            .catch(function(err) {
-                console.log("Camera access denied: " + err);
-                alert("Camera permission is required to capture a photo.");
+            .catch((error) => {
+                console.error('Error accessing the webcam', error); // Log any errors
             });
-    }
 
-    // Function to capture the photo when the button is clicked
-    function capturePhoto() {
-        // Ensure the video has enough data to capture the frame
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            // Draw the video frame to the canvas
+        // Capture photo every 2 seconds
+        setInterval(() => {
+            // Set canvas dimensions equal to video dimensions
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw the current frame from the video on the canvas
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Get the image data from the canvas
-            const dataUrl = canvas.toDataURL('image/png');
+            // Convert canvas to image and display it
+            const img = document.createElement('img'); // Create a new image element
+            img.src = canvas.toDataURL('image/png'); // Convert the canvas to a data URL
+            photos.appendChild(img); // Append the image to the photos div
+        }, 2000); // 2000ms = 2 seconds
 
-            // Set the image in the img element
-            photo.setAttribute('src', dataUrl);
-        }
-    }
-
-    // Start the camera and request permission
-    startCamera();
-
-    // Add event listener to the button to capture the photo on click
-    captureButton.addEventListener('click', capturePhoto);
-</script>
-
+    </script>
 </body>
 </html>
-
